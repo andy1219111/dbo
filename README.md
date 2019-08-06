@@ -1,7 +1,7 @@
 # dbo
 go数据库操作的封装
 
-##使用
+## 使用
 
 ```golang
 import (
@@ -18,7 +18,7 @@ dbOperator := dbo.DBOperator{Db: dbDataCenter}
 
 #### 查询
 
-```
+```golang
 userID := 15
 
 //查询
@@ -42,7 +42,7 @@ age, _ := strconv.Atoi(string(result[0]["age"]))
 
 #### 执行update、insert等操作
 
-```
+```golang
 sqlStr := `
 		INSERT INTO user (
 			user_name,
