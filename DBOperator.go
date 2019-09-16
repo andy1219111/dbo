@@ -3,12 +3,34 @@ package dbo
 import (
 	"database/sql"
 	"log"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type DBOperator struct {
 	Db *sql.DB
+	//连接最大复用时间
+	ConnMaxLifetime time.Duration
+	//设置最大打开的连接数，默认值为0表示不限制
+	MaxOpenConns int
+	//设置闲置的连接数
+	MaxIdleConns int
+}
+
+//实例化数据访问对象
+func NewDBOperator(db *sql.DB, ConnMaxLifetime time.Duration, MaxOpenConns, MaxIdleConns int) *DBOperator {
+	db.SetConnMaxLifetime(ConnMaxLifetime)
+	db.SetMaxOpenConns(MaxOpenConns)
+	db.SetMaxIdleConns(MaxIdleConns)
+	instance := &DBOperator{
+		Db:              db,
+		ConnMaxLifetime: ConnMaxLifetime,
+		MaxOpenConns:    MaxOpenConns,
+		MaxIdleConns:    MaxIdleConns,
+	}
+
+	return instance
 }
 
 /**
@@ -30,21 +52,19 @@ func (dbo *DBOperator) Query(sqlStr string, params ...interface{}) ([]map[string
 		log.Fatal(err)
 		return result, err
 	}
-
 	fields, err := rows.Columns()
 	if err != nil {
 		log.Fatal(err)
 		return result, err
 	}
 
-	values := make([]sql.RawBytes, len(fields))
-	scanArgs := make([]interface{}, len(fields))
-
-	for i := range scanArgs {
-		scanArgs[i] = &values[i]
-	}
-
 	for rows.Next() {
+		values := make([]sql.RawBytes, len(fields))
+		scanArgs := make([]interface{}, len(fields))
+
+		for i := range scanArgs {
+			scanArgs[i] = &values[i]
+		}
 		err := rows.Scan(scanArgs...)
 		if err != nil {
 			log.Fatal(err)
@@ -67,14 +87,15 @@ func (dbo *DBOperator) Query(sqlStr string, params ...interface{}) ([]map[string
 func (dbo *DBOperator) Execute(sqlStr string, params ...interface{}) (int64, error) {
 	//log.Printf("execute sql:%s,params:%+v", sqlStr, params)
 	stmt, err := dbo.Db.Prepare(sqlStr)
-	defer stmt.Close()
 	if err != nil {
 		return 0, err
 	}
+	defer stmt.Close()
 	result, err := stmt.Exec(params...)
 	if err != nil {
 		return 0, err
 	}
+
 	num, err := result.RowsAffected()
 	return num, err
 }
