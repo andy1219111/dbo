@@ -63,6 +63,8 @@ func (dbo *DBOperator) Query(sqlStr string, params ...interface{}) ([]map[string
 		log.Fatal(err)
 		return result, err
 	}
+	//关闭该连接
+	defer rows.Close()
 	fields, err := rows.Columns()
 	if err != nil {
 		log.Fatal(err)
@@ -109,4 +111,9 @@ func (dbo *DBOperator) Execute(sqlStr string, params ...interface{}) (int64, err
 
 	num, err := result.RowsAffected()
 	return num, err
+}
+
+//Close 关闭该数据库连接对象
+func (dbo *DBOperator) Close() {
+	dbo.Db.Close()
 }
