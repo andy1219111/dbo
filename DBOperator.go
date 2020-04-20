@@ -8,8 +8,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+//DBOperator 数据库操作对象
 type DBOperator struct {
 	Db *sql.DB
+	//数据源配置
+	DSN string
+	//数据库驱动类型
+	DriverName string
 	//连接最大复用时间
 	ConnMaxLifetime time.Duration
 	//设置最大打开的连接数，默认值为0表示不限制
@@ -18,19 +23,25 @@ type DBOperator struct {
 	MaxIdleConns int
 }
 
-//实例化数据访问对象
-func NewDBOperator(db *sql.DB, ConnMaxLifetime time.Duration, MaxOpenConns, MaxIdleConns int) *DBOperator {
+//NewDBOperator 实例化数据访问对象
+func NewDBOperator(dsn, driverName string, ConnMaxLifetime time.Duration, MaxOpenConns, MaxIdleConns int) (*DBOperator, error) {
+	db, err := sql.Open(driverName, dsn)
+	if err != nil {
+		return nil, err
+	}
 	db.SetConnMaxLifetime(ConnMaxLifetime)
 	db.SetMaxOpenConns(MaxOpenConns)
 	db.SetMaxIdleConns(MaxIdleConns)
 	instance := &DBOperator{
 		Db:              db,
+		DSN:             dsn,
+		DriverName:      driverName,
 		ConnMaxLifetime: ConnMaxLifetime,
 		MaxOpenConns:    MaxOpenConns,
 		MaxIdleConns:    MaxIdleConns,
 	}
 
-	return instance
+	return instance, nil
 }
 
 /**
