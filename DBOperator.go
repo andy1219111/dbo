@@ -75,7 +75,7 @@ func (dbo *DBOperator) Query(sqlStr string, params ...interface{}) ([]map[string
 		values := make([]sql.RawBytes, len(fields))
 		scanArgs := make([]interface{}, len(fields))
 
-		for i := range scanArgs {
+		for i := 0; i < len(fields); i++ {
 			scanArgs[i] = &values[i]
 		}
 		err := rows.Scan(scanArgs...)
