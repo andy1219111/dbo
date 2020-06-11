@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewDBOperator(*testing.T) {
-	dbo, err := dbo.NewDBOperator("user:pwd@tcp(192.168.9.153:3306)/tsdtdb?charset=utf8", "mysql", 30*time.Second, 100, 20)
+	dbo, err := dbo.NewDBOperator("user:password@tcp(192.168.9.153:3306)/tsdtdb?charset=utf8", "mysql", 30*time.Second, 100, 20)
 	if err != nil {
 		fmt.Println(err)
 		return
