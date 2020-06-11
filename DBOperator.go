@@ -71,14 +71,13 @@ func (dbo *DBOperator) Query(sqlStr string, params ...interface{}) ([]map[string
 		return result, err
 	}
 
-	//构造用来接收值的数组结构
-	values := make([]sql.RawBytes, len(fields))
-	scanArgs := make([]interface{}, len(fields))
-	for i := range values {
-		scanArgs[i] = &values[i]
-	}
-
 	for rows.Next() {
+		//构造用来接收值的数组结构
+		values := make([]sql.RawBytes, len(fields))
+		scanArgs := make([]interface{}, len(fields))
+		for i := range values {
+			scanArgs[i] = &values[i]
+		}
 		err := rows.Scan(scanArgs...)
 		if err != nil {
 			log.Fatal(err)
